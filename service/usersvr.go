@@ -105,4 +105,7 @@ func genToken(username string) string{
 	return hex.EncodeToString(h[:])
 }
 
-
+func GetUserByUsername(username string) (model.User, error) {
+	user ,err := dao.GetUserByUsername(username)
+	return *user, err
+}

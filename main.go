@@ -10,6 +10,7 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+
 )
 
 func main() {
@@ -33,6 +34,8 @@ func startHttp() {
 	http.HandleFunc("/login", handler.LoginHandler)
 	http.HandleFunc("/profile", handler.Authorized(handler.ProfileHandler))
 	http.Handle("/picture/", http.StripPrefix("/picture/", http.FileServer(http.Dir("picture"))))
+	http.HandleFunc("/query", handler.QueryHandler)
+
 	http.ListenAndServe(constant.HTTP_ADDR, nil)
 }
 
@@ -51,6 +54,9 @@ func startTcp() {
 	server.Register("UpdateUserNicknameByToken", service.UpdateUserNicknameByToken)
 	server.Register("UpdateUserPicUrlByToken", service.UpdateUserPicUrlByToken)
 
+
+	// for test
+	server.Register("GetUserByUsername", service.GetUserByUsername)
 	fmt.Println("RPC server running...")
 	server.Run()
 }

@@ -39,7 +39,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			log.Fatalln("fail to read static/login.html")
 		}
 
-
 		clientToken, err := r.Cookie("token")
 		if err != nil {
 			log.Printf("get token err: %v", err)
@@ -50,7 +49,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			w.Write(loginPage)
 			return
 		}
-		rpcClient := rpc.NewClient(constant.TCP_ADDR)
+		rpcClient := GetClient(clientToken.Value)
 		var ValidateToken func(string) (bool, error)
 		rpcClient.CallRPC("ValidateToken", &ValidateToken)
 		valid, _ := ValidateToken(clientToken.Value)
@@ -114,7 +113,7 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	token, _:= r.Cookie("token")
 	if r.Method == http.MethodGet{
 		var GetUserByToken func(string) (model.User, error)
-		client := rpc.NewClient(constant.TCP_ADDR)
+		client := GetClient(token.Value)
 		client.CallRPC("GetUserByToken", &GetUserByToken)
 		user, _:= GetUserByToken(token.Value)
 		fmt.Println(user.Username, user.Nickname, user.PicUrl)
@@ -122,7 +121,7 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 		profileTemplate.Execute(w, user.ToMap())
 
 	} else if r.Method == http.MethodPost {
-		client := rpc.NewClient(constant.TCP_ADDR)
+		client := GetClient(token.Value)
 		nickname := r.Form.Get("nickname")
 
 		file, header, err := r.FormFile("profile-picture")
@@ -171,4 +170,19 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		w.Write(resp.JsonBytes())
 	}
+}
+
+
+
+func QueryHandler(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	username := r.Form.Get("username")
+	fmt.Println(r.RemoteAddr)
+	client := GetClient(r.RemoteAddr)
+	var GetUserByUsername func(string) (model.User, error)
+	client.CallRPC("GetUserByUsername", &GetUserByUsername)
+	user, _ := GetUserByUsername(username)
+
+	w.Write([]byte(user.Username))
+
 }

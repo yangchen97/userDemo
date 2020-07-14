@@ -33,6 +33,7 @@ func GetUserByUsername(username string) (*model.User, error) {
 		log.Printf("prepare statement getuser err:%v", err)
 		return nil, err
 	}
+	defer stmt.Close()
 
 	row := stmt.QueryRow(username)
 	if row == nil {
@@ -51,6 +52,7 @@ func UpdateUserNicknameByUsername(username string, newNickname string) bool {
 		log.Printf("nickname prepare statement updateuser err:%v", err)
 		return false
 	}
+	defer stmt.Close()
 	res, err := stmt.Exec(newNickname, username)
 	if err != nil {
 		log.Printf("nickname exec statement updateuser err:%v", err)
@@ -82,6 +84,7 @@ func UpdateUserPicUrlByUsername(username string, newPicUrl string) bool {
 		log.Printf("pic_url prepare statement updateuser err:%v", err)
 		return false
 	}
+	defer stmt.Close()
 	fmt.Println(newPicUrl)
 	res, err := stmt.Exec(newPicUrl, username)
 	if err != nil {
